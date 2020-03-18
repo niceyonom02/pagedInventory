@@ -3,6 +3,8 @@ package pagedinventory;
 import event.InventoryCountChangedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.LinkedList;
 
@@ -53,6 +55,37 @@ public class InventorySet {
             }
         }
         return false;
+    }
+
+    @EventHandler
+    public void onClick(InventoryClickEvent e) {
+        for (int i = 0; i < inventories.size(); i++) {
+            if (inventories.get(i).isInventoryEquals(e.getInventory())) {
+                switch (inventories.get(i).getAction(e.getSlot())) {
+                    case NONE:
+                        break;
+                    case NEXT:
+                        e.setCancelled(true);
+                        if (i < inventories.size() - 1) {
+                            e.getWhoClicked().closeInventory();
+                            inventories.get(i + 1).openInventory((Player) e.getWhoClicked());
+                        }
+                        break;
+                    case CLOSE:
+                        e.setCancelled(true);
+                        e.getWhoClicked().closeInventory();
+                        break;
+                    case PREVIOUS:
+                        e.setCancelled(true);
+                        if (i > 0) {
+                            e.getWhoClicked().closeInventory();
+                            inventories.get(i - 1).openInventory((Player) e.getWhoClicked());
+                        }
+                        break;
+                }
+                break;
+            }
+        }
     }
 
 }
