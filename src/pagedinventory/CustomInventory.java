@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class CustomInventory implements Listener {
     public static class Builder {
@@ -29,7 +29,7 @@ public class CustomInventory implements Listener {
         }
     }
 
-    ArrayList<ItemStackWrapper> itemList = new ArrayList<>();
+    LinkedHashMap<Integer, ItemStackWrapper> itemList = new LinkedHashMap<>();
 
     Inventory inventory;
     private String title;
@@ -43,18 +43,30 @@ public class CustomInventory implements Listener {
         Bukkit.getPluginManager().registerEvents(this, PagedInventory.pagedInventory);
     }
 
-    public boolean addItem(ItemStack itemStack, ClickAction action) {
+    public boolean addItem(ItemStack itemStack, ClickAction clickAction) {
         if (itemList.size() < size) {
-            ItemStackWrapper itemStackWrapper = new ItemStackWrapper(itemStack, action);
-            itemList.add(itemStackWrapper);
+            ItemStackWrapper itemStackWrapper = new ItemStackWrapper(itemStack, clickAction);
+            itemList.put(getEmptySlot(), itemStackWrapper);
             updateInventory();
             return true;
         }
         return false;
     }
 
-    public boolean removeItem(){
-        if(!itemList.isEmpty()){
+    public boolean addItem(ItemStack itemStack, ClickAction clickAction, int slot) {
+        if (itemList.size() < size) {
+            if (slot < inventory.getSize()) {
+                ItemStackWrapper itemStackWrapper = new ItemStackWrapper(itemStack, clickAction);
+                itemList.put(slot, itemStackWrapper);
+                updateInventory();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeItem() {
+        if (!itemList.isEmpty()) {
             itemList.remove(itemList.size() - 1);
             updateInventory();
             return true;
@@ -62,15 +74,18 @@ public class CustomInventory implements Listener {
         return false;
     }
 
-    public boolean removeItem(ItemStack itemStack){
-            if(itemList.removeIf(wrapper -> wrapper.compareItem(itemStack))){
+    public boolean removeItem(int slot) {
+        if (!itemList.isEmpty()) {
+            if (inventory.getItem(slot) != null) {
+                itemList.remove(slot);
                 updateInventory();
                 return true;
             }
+        }
         return false;
     }
 
-    public void openInventory(Player player){
+    public void openInventory(Player player) {
         player.openInventory(inventory);
     }
 
@@ -86,23 +101,12 @@ public class CustomInventory implements Listener {
         updateInventory();
     }
 
-    public void updateInventory() {
+    private void updateInventory() {
         inventory.clear();
 
-        for (ItemStackWrapper wrapper : itemList) {
-            inventory.addItem(wrapper.getItem());
+        for (int slot : itemList.keySet()) {
+            inventory.setItem(slot, itemList.get(slot));
         }
-    }
-
-    private ItemStackWrapper getWrapper(int index) {
-        if (itemList.get(index) != null) {
-            return itemList.get(index);
-        }
-        return null;
-    }
-
-    public void save(String path) {
-
     }
 
     public ClickAction getAction(int slot) {
@@ -111,11 +115,22 @@ public class CustomInventory implements Listener {
 
     public boolean isInventoryEquals(Inventory inventory) {
         if (inventory.getTitle().equalsIgnoreCase(title)) {
-            if (inventory.getSize() == size) {
-                return true;
-            }
+            return inventory.getSize() == size;
         }
         return false;
+    }
+
+    private int getEmptySlot() {
+        int slot = 0;
+
+        for (int i = 0; i < inventory.getSize(); i++) {
+            if (inventory.getItem(i) != null) {
+                slot++;
+            } else {
+                return slot;
+            }
+        }
+        return slot;
     }
 
     public int inventoryItemCount(int start, int end) {
