@@ -1,6 +1,5 @@
 package pagedinventory;
 
-import net.minecraft.server.v1_12_R1.Items;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemStackWrapper {

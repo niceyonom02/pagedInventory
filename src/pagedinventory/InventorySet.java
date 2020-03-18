@@ -3,6 +3,7 @@ package pagedinventory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.LinkedList;
 
@@ -54,9 +55,20 @@ public class InventorySet {
         return null;
     }
 
+    public CustomInventory getInventory(ItemStack itemStack, int slot) {
+        for (CustomInventory inventory : inventories) {
+            if (inventory.hasItem(itemStack, slot)) {
+                return inventory;
+            }
+        }
+        return null;
+    }
+
+
     public int getInventoryCount() {
         return inventories.size();
     }
+
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {

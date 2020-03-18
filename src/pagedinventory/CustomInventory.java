@@ -1,5 +1,6 @@
 package pagedinventory;
 
+import itemcrafting.ItemCrafting;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -32,6 +33,7 @@ public class CustomInventory implements Listener {
     LinkedHashMap<Integer, ItemStackWrapper> itemList = new LinkedHashMap<>();
 
     Inventory inventory;
+
     private String title;
     private int size;
 
@@ -40,7 +42,7 @@ public class CustomInventory implements Listener {
         this.title = builder.title;
         this.size = builder.size;
 
-        Bukkit.getPluginManager().registerEvents(this, PagedInventory.pagedInventory);
+        Bukkit.getPluginManager().registerEvents(this, ItemCrafting.itemCrafting);
     }
 
     public boolean addItem(ItemStack itemStack, ClickAction clickAction) {
@@ -114,10 +116,7 @@ public class CustomInventory implements Listener {
     }
 
     public boolean isInventoryEquals(Inventory inventory) {
-        if (inventory.getTitle().equalsIgnoreCase(title)) {
-            return inventory.getSize() == size;
-        }
-        return false;
+        return this.inventory.equals(inventory);
     }
 
     private int getEmptySlot() {
@@ -142,5 +141,9 @@ public class CustomInventory implements Listener {
             }
         }
         return count;
+    }
+
+    public boolean hasItem(ItemStack itemStack, int slot) {
+        return inventory.getItem(slot).equals(itemStack);
     }
 }
